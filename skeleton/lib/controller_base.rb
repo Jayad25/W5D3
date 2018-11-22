@@ -6,7 +6,7 @@ require_relative './flash'
 
 class ControllerBase
   attr_reader :req, :res, :params
-  # attr_reader :already_built_response
+
   # Setup the controller
   def initialize(req, res)
     @req = req
@@ -16,7 +16,7 @@ class ControllerBase
 
   # Helper method to alias @already_built_response
   def already_built_response?
-     @already_built_response 
+     @already_built_response
   end
 
   # Set the response status code and header
@@ -36,14 +36,12 @@ class ControllerBase
     @res['Content-Type'] = content_type
     nil
   end
- 
+
   # use ERB and binding to evaluate templates
   # pass the rendered html to render_content
   def render(template_name)
     dir_path = File.dirname(__FILE__)
-     template_path = File.join(
-     dir_path, "views", "#{template_name}.html.erb"
-     )
+     template_path = File.join(dir_path, "..", "views",self.class.name.underscore, "#{template_name}.html.erb")
 
     template_code = File.read(template_path)
 
@@ -60,8 +58,11 @@ class ControllerBase
 
   # use this with the router to call action_name (:index, :show, :create...)
   def invoke_action(name)
+    self.send(name)
+    render(name) unless already_built_response?
+    nil
   end
-  
+
 private
 
  attr_accessor :already_built_response
@@ -73,4 +74,3 @@ private
    # flash.store_flash(@res)
  end
 end
-
